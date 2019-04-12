@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <TextView
+        android:id="@+id/tvResName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30dp"
+        android:textAllCaps="true"
+        android:textColor=" #000000"
+        android:padding="8dp"
+        />
+
+    <TextView
+        android:id="@+id/tvResTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor=" #000000"
+        android:padding="8dp"
+        />
+
+    <TextView
+        android:id="@+id/tvResDishes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="italic"
+        android:textAlignment="textEnd"
+        android:textColor=" #000000"
+        android:padding="8dp"
+        android:textSize="22dp"
+        />
+
+    <TextView
+        android:id="@+id/tvResPhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        />
+
+    <TextView
+        android:id="@+id/tvResNotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_marginBottom="16dp"
+        />
+
+</LinearLayout>
