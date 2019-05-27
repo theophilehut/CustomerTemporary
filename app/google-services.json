@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "763131455995",
+    "firebase_url": "https://madprueba01.firebaseio.com",
+    "project_id": "madprueba01",
+    "storage_bucket": "madprueba01.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:763131455995:android:f923c6209586ba89",
+        "android_client_info": {
+          "package_name": "polito.mad.drawer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "763131455995-66bf1mc3tdt8es3d0g442cac6cvh9smp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "polito.mad.drawer",
+            "certificate_hash": "6838c2a46db43745621da58ed5a8f678f8acd1be"
+          }
+        },
+        {
+          "client_id": "763131455995-0omdj0mshra4bn11f1is88n7devc7p3d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5K3K-0CLCLNTf8uyqBgmfzEMIGLgSv54"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "763131455995-0omdj0mshra4bn11f1is88n7devc7p3d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

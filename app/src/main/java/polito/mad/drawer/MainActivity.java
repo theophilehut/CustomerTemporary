@@ -29,6 +29,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -67,6 +72,7 @@ public class MainActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });*/
+
 
         cam = findViewById(R.id.button2);
         et_name = findViewById(R.id.editText1);
@@ -191,6 +197,12 @@ public class MainActivity extends AppCompatActivity
                 });
                 break;
             case R.id.Item02:
+                //Init Firebase
+                final FirebaseDatabase database = FirebaseDatabase.getInstance();
+                final DatabaseReference table_user = database.getReference("User");
+
+
+
                 //this part is for the persistence , however the preference can only save primitive types so , only the string variables
                 getSharedPreferences("pref",MODE_PRIVATE).edit().putString("name",et_name.getText().toString()).commit();
                 getSharedPreferences("pref",MODE_PRIVATE).edit().putString("email",et_email.getText().toString());
