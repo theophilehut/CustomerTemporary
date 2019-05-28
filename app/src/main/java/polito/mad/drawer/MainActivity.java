@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -30,9 +31,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,7 +48,7 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    public ImageButton b;
+
     private ImageButton cam;
     private EditText et_name;
     private EditText et_email;
@@ -57,21 +62,16 @@ public class MainActivity extends AppCompatActivity
     private MenuItem save;
     private MenuItem edit;
 
+    private String username;
+
+    private CustomerData customerData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
 
         cam = findViewById(R.id.button2);
@@ -87,11 +87,6 @@ public class MainActivity extends AppCompatActivity
         et_desc.setEnabled(false);
         et_phone.setEnabled(false);
         et_addr.setEnabled(false);
-        et_name.setHint("Name");
-        et_email.setHint("E-mail");
-        et_desc.setHint("Description");
-        et_phone.setHint("Phone number");
-        et_addr.setHint("Restaurant Address");
 
         et_name.setTextColor(Color.BLACK);
         et_email.setTextColor(Color.BLACK);
@@ -101,45 +96,10 @@ public class MainActivity extends AppCompatActivity
         cam.setVisibility(View.VISIBLE);
 
         im = findViewById(R.id.imageView);
+        username = getSharedPreferences("pref",MODE_PRIVATE).getString("username","");
 
-        if (getSharedPreferences("pref", MODE_PRIVATE).contains("name")) {
-            et_name.setText(getSharedPreferences("pref", MODE_PRIVATE).getString("name", ""));
-            et_email.setText(getSharedPreferences("pref", MODE_PRIVATE).getString("email", ""));
-            et_addr.setText(getSharedPreferences("pref", MODE_PRIVATE).getString("addr", ""));
-            et_desc.setText(getSharedPreferences("pref", MODE_PRIVATE).getString("desc", ""));
-            et_phone.setText(getSharedPreferences("pref", MODE_PRIVATE).getString("phone", ""));
+        updateDataFromDB(username);
 
-            //if there is a bundle, use the saved image resource (if one is there)
-            //image=savedInstanceState.getParcelable("BitmapImage");
-            try {
-                File filePath = getFileStreamPath(FILENAME);
-                FileInputStream fi = new FileInputStream(filePath);
-                bitmap = BitmapFactory.decodeStream(fi);
-                // ois.readObject();
-                fi.close();
-                // ois.close();
-                image = bitmap;
-                im.setImageBitmap(image);
-
-            } catch (Exception ex) {
-
-                Log.d("ERROR", ex.getMessage());
-            }
-
-
-        } else if (savedInstanceState != null) {
-
-            et_name.setText(savedInstanceState.getString("name"));
-            et_email.setText(savedInstanceState.getString("email"));
-            et_addr.setText(savedInstanceState.getString("addr"));
-            et_desc.setText(savedInstanceState.getString("desc"));
-            et_phone.setText(savedInstanceState.getString("phone"));
-
-            //if there is a bundle, use the saved image resource (if one is there)
-            image = savedInstanceState.getParcelable("BitmapImage");
-            bitmap = image;
-            im.setImageBitmap(image);
-        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -181,11 +141,6 @@ public class MainActivity extends AppCompatActivity
                 et_desc.setEnabled(true);
                 et_phone.setEnabled(true);
                 et_addr.setEnabled(true);
-                et_name.setText(getSharedPreferences("pref",MODE_PRIVATE).getString("name",""));
-                et_email.setText(getSharedPreferences("pref",MODE_PRIVATE).getString("email",""));
-                et_addr.setText(getSharedPreferences("pref",MODE_PRIVATE).getString("addr",""));
-                et_desc.setText(getSharedPreferences("pref",MODE_PRIVATE).getString("desc",""));
-                et_phone.setText(getSharedPreferences("pref",MODE_PRIVATE).getString("phone",""));
                 edit.setVisible(false);
                 save.setVisible(true);
                 cam.setClickable(true);
@@ -197,19 +152,7 @@ public class MainActivity extends AppCompatActivity
                 });
                 break;
             case R.id.Item02:
-                //Init Firebase
-                final FirebaseDatabase database = FirebaseDatabase.getInstance();
-                final DatabaseReference table_user = database.getReference("User");
-
-
-
                 //this part is for the persistence , however the preference can only save primitive types so , only the string variables
-                getSharedPreferences("pref",MODE_PRIVATE).edit().putString("name",et_name.getText().toString()).commit();
-                getSharedPreferences("pref",MODE_PRIVATE).edit().putString("email",et_email.getText().toString());
-                getSharedPreferences("pref",MODE_PRIVATE).edit().putString("addr",et_addr.getText().toString()).commit();
-                getSharedPreferences("pref",MODE_PRIVATE).edit().putString("desc",et_desc.getText().toString()).commit();
-                getSharedPreferences("pref",MODE_PRIVATE).edit().putString("phone",et_phone.getText().toString()).commit();
-                getSharedPreferences("pref",MODE_PRIVATE).edit().putString("email",et_email.getText().toString()).commit();
                 edit.setVisible(true);
                 save.setVisible(false);
                 et_name.setEnabled(false);
@@ -218,22 +161,24 @@ public class MainActivity extends AppCompatActivity
                 et_phone.setEnabled(false);
                 et_addr.setEnabled(false);
                 cam.setClickable(false);
-                //getSharedPreferences("pref",MODE_PRIVATE).edit().putParcelable("BitmapImage", bitmap);
-                try {
-                    FileOutputStream fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
-
-// Writing the bitmap to the output stream
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.flush();
-                    fos.close();
 
 
-
-
-                }catch (Exception exception){
-
-                    Log.e("ERROR",exception.getLocalizedMessage());
-
+//Update the database
+                //Update data fields
+                customerData.setName(et_name.getText().toString());
+                customerData.setPhone(et_phone.getText().toString());
+                customerData.setEmail(et_email.getText().toString());
+                customerData.setAdress(et_addr.getText().toString());
+                customerData.setDescription(et_desc.getText().toString());
+                //Get to the reference and update
+                DatabaseReference db = FirebaseDatabase.getInstance().getReference("Customers");
+                DataManager.uploadData(db, username, customerData);
+                //Add the picture
+                StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+                if (bitmap != null){
+                    Uri uri = DataManager.getImageUri(this, bitmap);
+                    StorageReference storageReference = mStorageRef.child("CustomerPictures/" + username + "/profile_picture.png");
+                    storageReference.putFile(uri);
                 }
 
         }
@@ -332,5 +277,33 @@ public class MainActivity extends AppCompatActivity
             }
         });
         builder.show();
+    }
+
+    private void updateDataFromDB(String identifier) {
+        DatabaseReference db = FirebaseDatabase.getInstance().getReference("Customers");
+        Query queryRef = db.orderByChild("username").equalTo(identifier);
+        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                customerData = dataSnapshot.getChildren().iterator().next().getValue(CustomerData.class);
+
+                et_name.setText(customerData.getName());
+                et_phone.setText(customerData.getPhone());
+                et_email.setText(customerData.getEmail());
+                et_addr.setText(customerData.getAdress());
+                et_desc.setText(customerData.getDescription());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        // Add the image
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference imageRef = storageRef.child("CustomerPictures/" + identifier +"/profile_picture.png");
+        Log.d("PROFILE", "image path : " + imageRef.getPath());
+        DataManager.loadImage(imageRef, im);
+
     }
 }
